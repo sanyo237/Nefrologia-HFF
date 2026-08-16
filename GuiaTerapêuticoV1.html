@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guia Terapêutico — Hospital Prof. Dr. Fernando Fonseca</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<style>
+  :root{
+    --navy: #1e293b;
+    --navy-light: #3d4a63;
+    --slate: #64748b;
+    --slate-light: #94a3b8;
+    --line: #d8dee8;
+    --bg: #f4f6f9;
+    --card: #ffffff;
+    --blue: #2f5fdb;
+    --danger: #c0362c;
+    --green: #22783c;
+    --amber: #b7791f;
+    --radius: 10px;
+  }
+  *{ box-sizing: border-box; }
+  body{
+    margin:0;
+    background: var(--bg);
+    font-family: 'Inter', system-ui, sans-serif;
+    color: var(--navy);
+  }
+  .wrap{
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 28px 20px 80px;
+  }
+  header.top{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    margin-bottom: 26px;
+  }
+  .logo{
+    width:40px;height:40px;border-radius:9px;
+    background: linear-gradient(135deg, var(--blue), #4a72e0);
+    display:flex;align-items:center;justify-content:center;
+    flex:none;
+  }
+  .logo svg{ width:18px; height:18px; }
+  h1{
+    font-family:'Source Serif 4', serif;
+    font-weight:700;
+    font-size: 22px;
+    margin:0;
+    letter-spacing: 0.2px;
+  }
+  .sub{
+    font-size:12px;
+    color: var(--slate);
+    margin-top:2px;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+  }
+  .card{
+    background: var(--card);
+    border:1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 22px;
+    margin-bottom: 18px;
+  }
+  .card h2{
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--slate);
+    margin: 0 0 14px 0;
+    font-weight:600;
+  }
+  .field-row{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+  label{
+    display:block;
+    font-size: 12px;
+    font-weight:600;
+    color: var(--navy-light);
+    margin-bottom: 5px;
+  }
+  input[type=text], input[type=date]{
+    width:100%;
+    padding: 9px 11px;
+    border:1px solid var(--line);
+    border-radius: 7px;
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--navy);
+    background: #fbfcfe;
+  }
+  input:focus{ outline: 2px solid var(--blue); outline-offset: 1px; }
+  textarea{
+    width:100%;
+    border:1px solid var(--line);
+    border-radius: 7px;
+    padding: 8px 10px;
+    font-family: inherit;
+    font-size: 13.5px;
+    resize: vertical;
+    min-height: 38px;
+    background: #fbfcfe;
+  }
+
+  /* ---- caixa de texto livre ---- */
+  .free-text-card textarea{
+    min-height: 100px;
+    font-size: 14px;
+  }
+  .free-text-actions{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-top: 12px;
+  }
+  .btn-secondary{
+    background: var(--navy);
+    color:#fff;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 13.5px;
+    font-weight:600;
+    border:none;
+    cursor:pointer;
+  }
+  .btn-secondary:hover{ background:#141b29; }
+  .parse-status{ font-size: 12.5px; color: var(--slate); }
+  .parse-status.error{ color: var(--danger); }
+  .abbr-hint{
+    font-size: 11.5px;
+    color: var(--slate-light);
+    margin-top: 8px;
+    line-height:1.5;
+  }
+  .abbr-hint code{
+    background:#eef1f6;
+    padding:1px 5px;
+    border-radius:4px;
+    color: var(--navy-light);
+    font-weight:600;
+  }
+
+  /* ---- tabela de pré-visualização (estilo do PDF) ---- */
+  .table-scroll{
+    overflow-x:auto;
+    border:1px solid var(--line);
+    border-radius: 8px;
+  }
+  table.meds-table{
+    border-collapse: collapse;
+    width:100%;
+    min-width: 980px;
+  }
+  table.meds-table thead th{
+    background: var(--navy);
+    color:#fff;
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing:.3px;
+    font-weight:700;
+    padding: 10px 8px;
+    text-align:center;
+    white-space: pre-line;
+  }
+  table.meds-table thead th:first-child{ text-align:left; padding-left:12px; }
+  table.meds-table td{
+    border-bottom: 1px solid var(--line);
+    border-right: 1px solid var(--line);
+    padding: 0;
+    vertical-align: middle;
+  }
+  table.meds-table td:last-child{ border-right:none; }
+  table.meds-table tbody tr:hover{ background: #fafbfd; }
+
+  table.meds-table td input, table.meds-table td textarea{
+    border:none;
+    border-radius:0;
+    background:transparent;
+    width:100%;
+    padding: 9px 8px;
+    font-size: 13px;
+  }
+  table.meds-table td input:focus, table.meds-table td textarea:focus{
+    outline: 2px solid var(--blue);
+    outline-offset: -2px;
+    background: #eef4ff;
+  }
+  .cell-name{ min-width: 190px; position:relative; }
+  .cell-name input{ font-weight:600; }
+  .cell-dose{ min-width: 90px; }
+  .cell-time input{ text-align:center; width:100%; min-width:56px; }
+  .cell-time input:not(:placeholder-shown){ color: var(--green); font-weight:700; }
+  .cell-obs{ min-width: 180px; }
+  .cell-obs textarea{ min-height: 34px; resize:vertical; }
+  .cell-pharmacy{ text-align:center; width: 60px; }
+  .cell-pharmacy input{ width:16px; height:16px; cursor:pointer; }
+  .cell-remove{ text-align:center; width: 40px; }
+  .row-remove-btn{
+    background:none; border:none; color: var(--danger);
+    cursor:pointer; font-size: 15px; padding: 6px;
+    line-height:1;
+  }
+  .row-remove-btn:hover{ transform: scale(1.15); }
+
+  .med-name.auto-corrected{
+    background: #fff8e8 !important;
+    box-shadow: inset 0 0 0 1px #f0d999;
+  }
+  .autocorrect-note{
+    position:absolute;
+    left:8px; right:8px; top: 100%;
+    margin-top:2px;
+    background:#1e293b;
+    color:#fff;
+    border-radius:5px;
+    padding: 4px 8px;
+    font-size:11px;
+    z-index: 5;
+    display:none;
+    white-space: nowrap;
+  }
+  .cell-name:hover .autocorrect-note{ display:block; }
+
+  .add-row-btn{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    width:100%;
+    padding: 11px;
+    margin-top: 12px;
+    border: 1.5px dashed var(--line);
+    border-radius: var(--radius);
+    background: transparent;
+    color: var(--navy-light);
+    font-weight:600;
+    font-size: 13.5px;
+    cursor:pointer;
+  }
+  .add-row-btn:hover{ border-color: var(--blue); color: var(--blue); }
+
+  .actions{
+    position: sticky;
+    bottom: 18px;
+    display:flex;
+    justify-content:flex-end;
+    gap:10px;
+    margin-top: 22px;
+  }
+  .btn{
+    padding: 12px 22px;
+    border-radius: 9px;
+    font-size: 14px;
+    font-weight:600;
+    cursor:pointer;
+    border: none;
+  }
+  .btn-primary{
+    background: var(--navy);
+    color:#fff;
+    box-shadow: 0 8px 20px -6px rgba(30,41,59,0.45);
+  }
+  .btn-primary:hover{ background: #141b29; }
+
+  .hint{
+    font-size: 12px;
+    color: var(--slate-light);
+    margin-top: 10px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="logo">
+      <svg viewBox="0 0 24 24" fill="none"><rect x="2" y="10" width="20" height="6" rx="3" transform="rotate(-40 12 12)" fill="#fff"/></svg>
+    </div>
+    <div>
+      <h1>Guia Terapêutico</h1>
+      <div class="sub">Serviço de Nefrologia · Hospital Prof. Dr. Fernando Fonseca, ULSASI</div>
+    </div>
+  </header>
+
+  <div class="card">
+    <h2>Doente</h2>
+    <div class="field-row">
+      <div>
+        <label for="patientName">Nome do doente (opcional)</label>
+        <input type="text" id="patientName" placeholder="Ex.: Maria Santos">
+      </div>
+      <div>
+        <label for="guideDate">Data do guia</label>
+        <input type="date" id="guideDate">
+      </div>
+    </div>
+    <div class="hint">Se deixar o nome em branco, o PDF é gerado com a caixa "Etiqueta do doente" por preencher, para colar a etiqueta física.</div>
+  </div>
+
+  <div class="card free-text-card">
+    <h2>Adicionar medicação por texto livre</h2>
+    <textarea id="freeTextInput" placeholder="Escreva um medicamento por linha."></textarea>
+    <div class="free-text-actions">
+      <button class="btn-secondary" id="parseBtn" type="button">Interpretar e adicionar à tabela</button>
+      <span class="parse-status" id="parseStatus"></span>
+    </div>
+    <div class="abbr-hint">
+      <strong>Reveja sempre</strong> a tabela abaixo — pode editar qualquer célula diretamente — antes de gerar o PDF.</div>
+  </div>
+
+  <div class="card">
+    <h2>Guia Terapêutico editável</h2>
+    <div class="table-scroll">
+      <table class="meds-table" id="medsTable">
+        <thead>
+          <tr>
+            <th style="min-width:190px">Medicamento</th>
+            <th style="min-width:90px">Dosagem</th>
+            <th>Jejum</th>
+            <th>Peq.&#10;Almoço</th>
+            <th>Almoço</th>
+            <th>Lanche</th>
+            <th>Jantar</th>
+            <th>Deitar</th>
+            <th style="min-width:180px">Observações</th>
+            <th style="min-width:70px">Farm.<br>Hosp.</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="medsTbody"></tbody>
+      </table>
+    </div>
+    <button class="add-row-btn" id="addRowBtn" type="button">+ Adicionar linha</button>
+     </div>
+
+  <div class="actions">
+    <button class="btn btn-primary" id="generateBtn" type="button">Gerar PDF</button>
+  </div>
+
+</div>
+
+<template id="rowTemplate">
+  <tr>
+    <td class="cell-name">
+      <input type="text" class="med-name" placeholder="Nome do medicamento">
+    </td>
+    <td class="cell-dose"><input type="text" class="med-dose" placeholder="Dose"></td>
+    <td class="cell-time"><input type="text" data-time="Jejum" placeholder="—"></td>
+    <td class="cell-time"><input type="text" data-time="Peq. Almoço" placeholder="—"></td>
+    <td class="cell-time"><input type="text" data-time="Almoço" placeholder="—"></td>
+    <td class="cell-time"><input type="text" data-time="Lanche" placeholder="—"></td>
+    <td class="cell-time"><input type="text" data-time="Jantar" placeholder="—"></td>
+    <td class="cell-time"><input type="text" data-time="Deitar" placeholder="—"></td>
+    <td class="cell-obs"><textarea class="med-obs" placeholder="Observações"></textarea></td>
+    <td class="cell-pharmacy"><input type="checkbox" class="pharmacy-checkbox" title="Adicionar 'Farmácia Hospitalar' às observações"></td>
+    <td class="cell-remove"><button class="row-remove-btn" type="button" title="Remover linha">✕</button></td>
+  </tr>
+</template>
+
+<script>
+const HOSPITAL_NOME = "HOSPITAL PROF. DR. FERNANDO FONSECA \u2022 ULSASI";
+const NAVY = [30, 41, 59];
+const NAVY_LIGHT = [61, 74, 99];
+const SLATE = [148, 163, 184];
+const LINE = [216, 222, 232];
+const BLUE = [47, 95, 219];
+
+/* =========================================================
+   Lista de fármacos para deteção/correção automática de erros
+   de transcrição — importada de lista_medicação.xlsx (596 fármacos).
+   ========================================================= */
+const DRUG_NAMES = [
+"Abacavir","Abacavir + Lamivudina","Abacavir + Lamivudina + Zidovudina","Acarbose","Aceclofenac","Acenocumarol","Acetato de eslicarbazepina","Acetilcisteína",
+"Acetilsalicilato de lisina","Aciclovir","Ácido acetilsalicílico","Ácido alendrónico","Ácido alendrónico + Colecalciferol","Ácido azelaico","Ácido fusídico","Ácido gadopentético",
+"Ácido ibandrónico","Ácido micofenólico","Ácido tranexâmico","Ácido ursodesoxicólico","Ácido valpróico","Ácido zoledrónico","Acitretina","Adenosina",
+"Agomelatina","Alfacalcidol","Alfuzosina","Almotriptano","Alopurinol","Alprazolam","Alprostadilo","Amantadina",
+"Ambrisentano","Ambroxol","Amicacina","Amifampridina","Amiodarona","Amissulprida","Amlodipina","Amlodipina + Atorvastatina",
+"Amlodipina + Olmesartan medoxomilo","Amlodipina + Olmesartan medoxomilo + Hidroclorotiazida","Amlodipina + Telmisartan","Amlodipina + Valsartan","Amlodipina + Valsartan + Hidroclorotiazida","Amorolfina","Amoxicilina","Amoxicilina + Ácido clavulânico",
+"Ampicilina","Anastrozol","Apixabano","Apomorfina","Aripiprazol","Arteméter + Lumefantrina","Articaína + Adrenalina","Aspirina",
+"Atazanavir","Atenolol","Atenolol + Clorotalidona","Atomoxetina","Atorvastatina","Atorvastatina + Ezetimiba","Atosibano","Atovaquona","Atropina",
+"Axitinib","Azacitidina","Azatioprina","Azelastina + Fluticasona","Azitromicina","Bicarbonato de sódio","Baclofeno","Beclometasona","Benazepril",
+"Benazepril + Hidroclorotiazida","Bendamustina","Bendroflumetiazida","Besilato de atracúrio","Besilato de cisatracúrio","Beta-histina","Betametasona","Betametasona + Ácido fusídico",
+"Betametasona + Calcipotriol","Betaxolol","Bicalutamida","Bilastina","Bimatoprost","Bisoprolol","Bisoprolol + Hidroclorotiazida","Bivalirudina",
+"Bleomicina","Bortezomib","Bosentano","Bosutinib","Brimonidina","Bromazepam","Brometo de ipratrópio","Brometo de ipratrópio + Salbutamol",
+"Brometo de pancurónio","Brometo de piridostigmina","Brometo de rocurónio","Brometo de vecurónio","Bromexina","Bromocriptina","Brotizolam","Budesonida",
+"Bupivacaína","Buprenorfina","Buprenorfina + Naloxona","Bupropiom","Buspirona","Bussulfano","Butilescopolamina","Cabergolina",
+"Calcifediol","Calcitonina de salmão","Calcitriol","Candesartan","Candesartan + Hidroclorotiazida","Capecitabina","Captopril","Captopril + Hidroclorotiazida",
+"Carbamazepina","Carboplatina","Carvedilol","Cefaclor","Cefazolina","Cefepima","Cefeprozil","Cefixima",
+"Cefotaxima","Cefoxitina","Cefpodoxima","Ceftazidima","Ceftriaxona","Cefuroxima","Celecoxib","Cetamina",
+"Cetirizina","Cetoconazol","Cetoprofeno","Cetorolac","Cetotifeno","Cianocobalamina","Ciclosporina","Cilazapril",
+"Cilazapril + Hidroclorotiazida","Cinacalcet","Cinarizina","Cinarizina + Dimenidrinato","Ciprofibrato","Ciprofloxacina","Ciproterona","Ciproterona + Etinilestradiol",
+"Cisplatina","Citalopram","Citarabina","Citicolina","Cladribina","Claritromicina","Clindamicina","Clobazam",
+"Clobetasol","Clonazepam","Clopidogrel","Clopidogrel + Ácido acetilsalicílico","Cloreto de potássio","Cloreto de potássio + Cloreto de sódio","Cloreto de potássio + Glucose","Cloreto de sódio",
+"Cloreto de tróspio","Cloromadinona + Etinilestradiol","Clotrimazol","Clozapina","Colistimetato de sódio","Crisantaspase","Dabigatrano etexilato","Dapagliflozina",
+"Dapagliflozina + Metformina","Daptomicina","Darbepoetina","Dasatinib","Deferasirox","Deferriprona","Deflazacorte","Degarrelix","Desloratadina",
+"Desmopressina","Desogestrel","Desogestrel + Etinilestradiol","Dexametasona","Dexametasona + Tobramicina","Dexcetoprofeno","Dexclorofeniramina","Diazepam",
+"Diclofenac","Diclofenac + Misoprostol","Dienogest","Dienogest + Etinilestradiol","Dienogest + Valerato de estradiol","Diltiazem","Dobesilato de cálcio","Dobutamina",
+"Docetaxel","Domperidona","Donepezilo","Dopamina","Dorzolamida","Doxazosina","Doxorrubicina","Droperidol",
+"Drospirenona + Estradiol","Drospirenona + Etinilestradiol","Duloxetina","Dutasterida","Dutasterida + Tansulosina","Ebastina","Edoxabano","Efavirenz",
+"Eletriptano","Eltrombopag","Empagliflozina","Empagliflozina + Metformina","Emtricitabina + Tenofovir","Enalapril","Enalapril + Hidroclorotiazida","Enalapril + Lercanidipina",
+"Entacapona","Enzalutamida","Epirrubicina","Eplerenona","Eprosartan","Eribulina","Escitalopram","Esmolol",
+"Esomeprazol","Espironolactona","Ésteres etílicos 90 do ácido omega-3","Estradiol + Noretisterona","Etinilestradiol + Etonogestrel","Etinilestradiol + Gestodeno","Etinilestradiol + Levonorgestrel","Etinilestradiol + Norgestimato",
+"Etodolac","Etofenamato","Etomidato","Etoposido","Etoricoxib","Exemestano","Ezetimiba","Famotidina",
+"Fampridina","Febuxostate","Felodipina","Fenitoína","Fenofibrato","Fentanilo","Fesoterodina","Fexofenadina",
+"Filgrastim","Finasterida","Finerenona","Flecainida","Flucloxacilina","Fluconazol","Fludarabina","Flumazenilo",
+"Fluorouracilo","Fluoxetina","Flupirtina","Flutamida","Fluticasona","Fluticasona + Salmeterol","Fluvastatina","Fluvoxamina",
+"Folinato de cálcio","Formoterol","Fosfomicina","Fosinopril","Fosinopril + Hidroclorotiazida","Fumarato de dimetilo","Furoato de fluticasona","Furosemida",
+"Gabapentina","Gadobutrol","Galantamina","Ganciclovir","Ganirrelix","Gemcitabina","Gemfibrozil","Gentamicina",
+"Glibenclamida","Gliclazida","Glimepirida","Glipizida","Glucosamina","Granissetrom","Haloperidol","Hidroclorotiazida + Amilorida",
+"Hidrocortisona","Hidroxicarbamida","Hidroxietilamido + Cloreto de sódio","Hidroxizina","Hipromelose","Ibuprofeno","Ibuprofeno + Pseudoefedrina","Idarrubicina",
+"Iloprost","Imatinib","Imipenem + Cilastatina","Imiquimod","Indapamida","Iodopovidona","Io-hexol","Iopamidol",
+"Irbesartan","Irbesartan + Hidroclorotiazida","Irinotecano","Isoconazol","Isotretinoína","Itraconazol","Ivabradina","Labetalol",
+"Lacidipina","Lacosamida","Lactulose","Lamivudina","Lamivudina + Zidovudina","Lamotrigina","Lansoprazol","Latanoprost","Iptacopan",
+"Latanoprost + Timolol","Leflunomida","Lercanidipina","Letrozol","Levetiracetam","Levobupivacaína","Levocetirizina","Levodopa + Benserazida",
+"Levodopa + Carbidopa","Levodopa + Carbidopa + Entacapona","Levofloxacina","Levofolinato de cálcio","Levonorgestrel","Levossimendano","Levotiroxina sódica","Lidocaína",
+"Lidocaína + Adrenalina","Linagliptina","Linezolida","Lisinopril","Lisinopril + Amlodipina","Lisinopril + Hidroclorotiazida","Loperamida","Lopinavir + Ritonavir",
+"Loprazolam","Loratadina","Lorazepam","Losartan","Losartan + Hidroclorotiazida","Lovastatina","Lurasidona","Macitentano",
+"Macrogol","Macrogol + Bicarbonato de sódio + Cloreto de potássio + Cloreto de sódio","Maprotilina","Melatonina","Meloxicam","Memantina","Mepivacaína","Meropenem",
+"Metamizol magnésico","Metamizol sódico","Metformina","Metformina + Linagliptina","Metformina + Pioglitazona","Metformina + Sitagliptina","Metformina + Vildagliptina","Metilfenidato",
+"Metilprednisolona","Metoclopramida","Metoprolol","Metotrexato","Metronidazol","Micofenolato de mofetil","Midazolam","Minociclina",
+"Minoxidil","Mircera","Mirabegrom","Mirtazapina","Mitomicina","Mitoxantrona","Moclobemida","Modafinil","Mometasona",
+"Mononitrato de isossorbida","Montelucaste","Morfina","Moxifloxacina","Nabumetona","Nalbufina","Naloxona","Naltrexona",
+"Naproxeno","Naproxeno + Esomeprazol","Naratriptano","Nebivolol","Nevirapina","Nicorandilo","Nicotina","Nifedipina",
+"Nilotinib","Nimesulida","Nimodipina","Nintedanib","Nitrofurantoína","Nitroglicerina","Noradrenalina","Norfloxacina",
+"Octreotido","Ofloxacina","Olanzapina","Olmesartan medoxomilo","Olmesartan medoxomilo + Hidroclorotiazida","Olopatadina","Omeprazol","Ondansetrom",
+"Oseltamivir","Oxaliplatina","Oxibutinina","Oxicodona","Oxicodona + Naloxona","Óxido férrico sacarosado","Oximetazolina","Oxitocina",
+"Paclitaxel","Paliperidona","Palonossetrom","Pamidronato de sódio","Pantoprazol","Paracetamol","Paracetamol + Codeína","Paracetamol + Fenilefrina",
+"Paricalcitol","Paroxetina","Patirómero","Pazopanib","Pemetrexedo","Pentoxifilina","Perampanel","Pergolida","Perindopril",
+"Perindopril + Amlodipina","Perindopril + Indapamida","Perindopril + Indapamida + Amlodipina","Pioglitazona","Piperacilina","Piperacilina + Tazobactam","Piracetam","Pirfenidona",
+"Piroxicam","Pitavastatina","Pomalidomida","Posaconazol","Pramipexol","Pravastatina","Prednisolona","Pregabalina",
+"Progesterona","Prometazina","Propafenona","Propiverina","Propofol","Propranolol","Quetiapina","Quinapril",
+"Quinapril + Hidroclorotiazida","Rabeprazol","Racecadotril","Raloxifeno","Ramipril","Ramipril + Hidroclorotiazida","Ranelato de estrôncio","Ranitidina",
+"Ranolazina","Rasagilina","Remifentanilo","Repaglinida","Ribavirina","Rilmenidina","Riluzol","Risedronato de sódio",
+"Risperidona","Rivaroxabano","Rivastigmina","Rizatriptano","Roflumilaste","Ropinirol","Ropivacaína","Rosuvastatina",
+"Rosuvastatina + Ezetimiba","Rotigotina","Roxitromicina","Rupatadina","Sacubitril + Valsartan","Safinamida","Salbutamol","Sapropterina",
+"Saquinavir","Saxagliptina","Selegilina","Sertralina","Sevelâmero","Sevoflurano","Sibutramina","Sildenafil","Sinvastatina",
+"Sinvastatina + Ezetimiba","Sitagliptina","Solifenacina","Solifenacina + Tansulosina","Somatostatina","Sotalol","Sucralfato","Sufentanilo",
+"Sulfametoxazol + Trimetoprim","Sulpirida","Sumatriptano","Sunitinib","Tacrolímus","Tadalafil","Tafamidis","Tamoxifeno",
+"Tansulosina","Tapentadol","Tecnécio (99mTc) sestamibi","Teicoplanina","Telmisartan","Telmisartan + Hidroclorotiazida","Temozolomida","Tenofovir",
+"Tenoxicam","Terazosina","Terbinafina","Teriflunomida","Terlipressina","Tetrabenazina","Tiamina","Tianeptina",
+"Tiaprida","Tibolona","Ticagrelor","Ticlopidina","Tilactase","Timolol + Dorzolamida","Timolol + Travoprost","Tiocolquicosido",
+"Tioconazol","Tiotepa","Tirofibano","Tizanidina","Tobramicina","Tolterrodina","Topiramato","Topotecano",
+"Tramadol","Tramadol + Dexcetoprofeno","Tramadol + Paracetamol","Trandolapril","Travoprost","Trazodona","Trientina","Triflusal",
+"Trimetazidina","Trimetoprim","Ulipristal","Urapidilo","Valaciclovir","Valganciclovir","Valsartan","Valsartan + Hidroclorotiazida",
+"Vancomicina","Vardenafil","Vareniclina","Velphoro","Venlafaxina","Vildagliptina","Vinblastina","Vincristina","Vinorrelbina",
+"Vinpocetina","Voriconazol","Vortioxetina","Zircónio","Zidovudina","Ziprasidona","Zofenopril","Zolmitriptano","Zolpidem",
+"Zonisamida"
+];
+
+function normalize(s){
+  return s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+}
+
+function levenshtein(a, b){
+  const m = a.length, n = b.length;
+  if(m === 0) return n;
+  if(n === 0) return m;
+  const dp = Array.from({length: m+1}, () => new Array(n+1).fill(0));
+  for(let i=0;i<=m;i++) dp[i][0]=i;
+  for(let j=0;j<=n;j++) dp[0][j]=j;
+  for(let i=1;i<=m;i++){
+    for(let j=1;j<=n;j++){
+      const cost = a[i-1]===b[j-1] ? 0 : 1;
+      dp[i][j] = Math.min(
+        dp[i-1][j] + 1,
+        dp[i][j-1] + 1,
+        dp[i-1][j-1] + cost
+      );
+    }
+  }
+  return dp[m][n];
+}
+
+function capitalizeFirst(str){
+  if(!str) return str;
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+function suggestDrugName(input){
+  const norm = normalize(input);
+  if(norm.length < 4) return null;
+  // já está correto (ignorando maiúsculas/acentos)?
+  if(DRUG_NAMES.some(d => normalize(d) === norm)) return null;
+
+  // 1) correspondência por prefixo — texto abreviado/incompleto (ex.: "furo" -> "Furosemida").
+  //    Exige pelo menos 4 letras. Se houver vários fármacos com o mesmo prefixo,
+  //    escolhe o nome mais curto (normalmente o composto "base", não uma associação).
+  const prefixMatches = DRUG_NAMES.filter(d => normalize(d).startsWith(norm));
+  if(prefixMatches.length > 0){
+    prefixMatches.sort((a, b) => a.length - b.length);
+    return prefixMatches[0];
+  }
+
+  // 2) erro de escrita num nome completo — distância de Levenshtein
+  let best = null, bestDist = Infinity;
+  for(const drug of DRUG_NAMES){
+    const dn = normalize(drug);
+    // otimização simples: ignora candidatos com tamanho muito diferente
+    if(Math.abs(dn.length - norm.length) > 3) continue;
+    const dist = levenshtein(norm, dn);
+    if(dist < bestDist){ bestDist = dist; best = drug; }
+  }
+  const threshold = norm.length <= 6 ? 2 : 3;
+  if(best && bestDist > 0 && bestDist <= threshold){
+    return best;
+  }
+  return null;
+}
+
+/* ---- Farmácia Hospitalar: medicamentos com checkbox pré-selecionada ---- */
+const PHARMACY_NOTE = 'Farmácia Hospitalar';
+const PHARMACY_TRIGGER_KEYWORDS = [
+  'bicarbonato', 'zirconio', 'patiromero', 'darbepoetina', 'mircera',
+  'cinacalcet', 'iptacopan', 'atovaquona', 'sevelamero', 'velphoro', 'alfacalcidol', 'paricalcitol'
+];
+
+function shouldFlagPharmacy(name){
+  const norm = normalize(name);
+  return PHARMACY_TRIGGER_KEYWORDS.some(kw => norm.includes(kw));
+}
+
+function addPharmacyNote(obsField){
+  const parts = obsField.value.split(/;\s*/).map(p => p.trim()).filter(Boolean);
+  if(parts.includes(PHARMACY_NOTE)) return;
+  parts.push(PHARMACY_NOTE);
+  obsField.value = parts.join('; ');
+}
+
+function removePharmacyNote(obsField){
+  const parts = obsField.value.split(/;\s*/).map(p => p.trim()).filter(p => p && p !== PHARMACY_NOTE);
+  obsField.value = parts.join('; ');
+}
+
+function updatePharmacyFlag(row){
+  const nameInput = row.querySelector('.med-name');
+  const checkbox = row.querySelector('.pharmacy-checkbox');
+  const obsField = row.querySelector('.med-obs');
+  const name = nameInput.value.trim();
+  if(!name || !shouldFlagPharmacy(name)) return;
+  // só força a marcação se corresponder à lista; nunca desmarca uma escolha manual do utilizador
+  if(!checkbox.checked){
+    checkbox.checked = true;
+    addPharmacyNote(obsField);
+  }
+}
+
+/* ========================= Tabela ========================= */
+const medsTbody = document.getElementById('medsTbody');
+const rowTemplate = document.getElementById('rowTemplate');
+
+function closeSuggestBox(cellName){
+  const existing = cellName.querySelector('.autocorrect-note');
+  if(existing) existing.remove();
+}
+
+function applyAutoCorrect(nameInput){
+  const cellName = nameInput.closest('.cell-name');
+  closeSuggestBox(cellName);
+  nameInput.classList.remove('auto-corrected');
+  const val = nameInput.value.trim();
+  if(!val) return;
+  const suggestion = suggestDrugName(val);
+
+  if(suggestion){
+    // correção automática, sem necessidade de confirmação do utilizador
+    nameInput.value = suggestion;
+    nameInput.classList.add('auto-corrected');
+
+    const note = document.createElement('div');
+    note.className = 'autocorrect-note';
+    note.textContent = `Corrigido automaticamente de "${val}"`;
+    cellName.appendChild(note);
+  } else {
+    // sem correspondência na lista: garante ainda assim a inicial maiúscula
+    nameInput.value = capitalizeFirst(val);
+  }
+
+  const row = nameInput.closest('tr');
+  if(row) updatePharmacyFlag(row);
+}
+
+function attachNameSuggestion(nameInput){
+  nameInput.addEventListener('blur', () => applyAutoCorrect(nameInput));
+}
+
+function addRow(prefill){
+  const node = rowTemplate.content.firstElementChild.cloneNode(true);
+  node.querySelector('.row-remove-btn').addEventListener('click', () => node.remove());
+
+  const nameInput = node.querySelector('.med-name');
+  attachNameSuggestion(nameInput);
+
+  const pharmacyCheckbox = node.querySelector('.pharmacy-checkbox');
+  const obsField = node.querySelector('.med-obs');
+  pharmacyCheckbox.addEventListener('change', () => {
+    if(pharmacyCheckbox.checked) addPharmacyNote(obsField);
+    else removePharmacyNote(obsField);
+  });
+
+  if(prefill){
+    nameInput.value = prefill.name || '';
+    node.querySelector('.med-dose').value = prefill.dose || '';
+    obsField.value = prefill.obs || '';
+    if(prefill.times){
+      node.querySelectorAll('[data-time]').forEach(inp => {
+        inp.value = prefill.times[inp.dataset.time] || '';
+      });
+    }
+  }
+  medsTbody.appendChild(node);
+  if(prefill && prefill.name){
+    applyAutoCorrect(nameInput);
+  }
+  return node;
+}
+
+document.getElementById('addRowBtn').addEventListener('click', () => addRow());
+
+/* ================= Interpretação de texto livre ================= */
+const parseBtn = document.getElementById('parseBtn');
+const parseStatus = document.getElementById('parseStatus');
+const freeTextInput = document.getElementById('freeTextInput');
+
+// palavra-chave por extenso (case-insensitive) + abreviatura (case-insensitive, token isolado)
+const TIME_PATTERNS = [
+  { key: 'Peq. Almoço', re: /pequeno[- ]?almo[cç]o|peq\.?\s*almo[cç]o/i, abbr: /\bpa\b/i },
+  { key: 'Almoço',      re: /almo[cç]o/i,                                 abbr: /\b(a|alm)\b/i },
+  { key: 'Lanche',      re: /lanche/i },
+  { key: 'Jantar',      re: /jantar/i,                                    abbr: /\b(j|jant)\b/i },
+  { key: 'Deitar',      re: /deitar|noite/i },
+  { key: 'Jejum',       re: /jejum|manh[ãa]/i,                            abbr: /\b(jj|jej)\b/i },
+];
+const DOSE_RE = /(\d+([.,]\d+)?)\s*(mg|mcg|µg|g|ml|ui)\b/i;
+const QTY_RE = /\d+\/\d+|\d+([.,]\d+)?/;
+const OBS_RE = /\b(se\s+[^,.;]+|sos[^,.;]*|em caso de[^,.;]+|quando necess[áa]rio[^,.;]*)/i;
+
+// esquema numérico tipo "1+0+1" (2 ou 3 valores separados por "+")
+const PLUS_SCHEME_RE = /(\d+(?:\/\d+)?(?:[.,]\d+)?)\s*\+\s*(\d+(?:\/\d+)?(?:[.,]\d+)?)(?:\s*\+\s*(\d+(?:\/\d+)?(?:[.,]\d+)?))?/;
+
+function applyPlusScheme(rest, times){
+  const m = rest.match(PLUS_SCHEME_RE);
+  if(!m) return rest;
+  const parts = [m[1], m[2], m[3]].filter(v => v !== undefined);
+  let slots;
+  if(parts.length === 2) slots = ['Almoço', 'Jantar'];
+  else if(parts.length === 3) slots = ['Peq. Almoço', 'Almoço', 'Jantar'];
+  else return rest;
+  parts.forEach((val, i) => {
+    if(val && val !== '0') times[slots[i]] = val;
+  });
+  return rest.slice(0, m.index) + rest.slice(m.index + m[0].length);
+}
+
+function matchTimeInClause(clause){
+  // abreviaturas primeiro (sensíveis a maiúsculas, tokens isolados)
+  for(const p of TIME_PATTERNS){
+    if(p.abbr && p.abbr.test(clause)) return p.key;
+  }
+  for(const p of TIME_PATTERNS){
+    if(p.re.test(clause)) return p.key;
+  }
+  return null;
+}
+
+function parseLine(line){
+  line = line.trim();
+  if(!line) return null;
+  line = line.replace(/^[-*•]\s*/, '').replace(/^\d+[.)]\s*/, '');
+
+  const doseMatch = line.match(DOSE_RE);
+  let name, rest;
+  if(doseMatch){
+    name = line.slice(0, doseMatch.index).trim().replace(/[-–—,]+$/,'').trim();
+    rest = line.slice(doseMatch.index + doseMatch[0].length);
+  } else {
+    const sep = line.search(/[-–—,]/);
+    if(sep > 0){
+      name = line.slice(0, sep).trim();
+      rest = line.slice(sep + 1);
+    } else {
+      const numMatch = line.match(/\d/);
+      if(numMatch){
+        name = line.slice(0, numMatch.index).trim();
+        rest = line.slice(numMatch.index);
+      } else {
+        name = line.trim();
+        rest = '';
+      }
+    }
+  }
+  if(!name) return null;
+
+  const times = {};
+  rest = applyPlusScheme(rest, times);
+
+  const clauses = rest.split(/,|;| e (?=\d|[a-zà-ú])/i).map(c => c.trim()).filter(Boolean);
+  let obs = '';
+
+  clauses.forEach(clause => {
+    const matchedTime = matchTimeInClause(clause);
+    if(matchedTime){
+      const qtyMatch = clause.match(QTY_RE);
+      times[matchedTime] = qtyMatch ? qtyMatch[0] : '1';
+    } else if(OBS_RE.test(clause)){
+      const obsMatch = clause.match(OBS_RE);
+      obs = obs ? obs + '; ' + obsMatch[0].trim() : obsMatch[0].trim();
+    }
+  });
+
+  return {
+    name,
+    dose: doseMatch ? doseMatch[0].replace(/\s+/g,'') : '',
+    obs,
+    times
+  };
+}
+
+parseBtn.addEventListener('click', () => {
+  const text = freeTextInput.value.trim();
+  if(!text){
+    parseStatus.textContent = 'Escreva a lista de medicação antes de interpretar.';
+    parseStatus.classList.add('error');
+    return;
+  }
+
+  const lines = text.split('\n');
+  const items = lines.map(parseLine).filter(Boolean);
+
+  if(items.length === 0){
+    parseStatus.textContent = 'Não foi possível identificar medicamentos. Escreva um medicamento por linha.';
+    parseStatus.classList.add('error');
+    return;
+  }
+
+  // remove linhas em branco existentes na tabela antes de inserir as novas
+  Array.from(medsTbody.querySelectorAll('tr')).forEach(tr => {
+    if(!tr.querySelector('.med-name').value.trim()) tr.remove();
+  });
+
+  items.forEach(item => addRow(item));
+
+  freeTextInput.value = '';
+  parseStatus.classList.remove('error');
+  parseStatus.textContent = `${items.length} medicamento(s) adicionado(s) à tabela. Reveja os campos.`;
+});
+
+// data padrão de hoje
+const dateInput = document.getElementById('guideDate');
+const today = new Date();
+dateInput.value = today.toISOString().slice(0,10);
+
+// começa com uma linha em branco
+addRow();
+
+function collectData(){
+  const meds = [];
+  medsTbody.querySelectorAll('tr').forEach(row => {
+    const name = row.querySelector('.med-name').value.trim();
+    if(!name) return;
+    const dose = row.querySelector('.med-dose').value.trim();
+    const obs = row.querySelector('.med-obs').value.trim();
+    const times = {};
+    row.querySelectorAll('[data-time]').forEach(inp => {
+      times[inp.dataset.time] = inp.value.trim();
+    });
+    meds.push({name, dose, obs, times});
+  });
+  return meds;
+}
+
+function formatDatePT(isoStr){
+  if(!isoStr) return '';
+  const [y,m,d] = isoStr.split('-');
+  return `${d}/${m}/${y}`;
+}
+
+document.getElementById('generateBtn').addEventListener('click', () => {
+  const meds = collectData();
+  if(meds.length === 0){
+    alert('Adicione pelo menos um medicamento com nome antes de gerar o PDF.');
+    return;
+  }
+  const patientName = document.getElementById('patientName').value.trim();
+  const dateStr = formatDatePT(dateInput.value) || formatDatePT(today.toISOString().slice(0,10));
+  generatePDF(meds, patientName, dateStr);
+});
+
+function generatePDF(meds, patientName, dateStr){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
+  const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
+  const margin = 40;
+
+  // ---- Cabeçalho ----
+  doc.setFillColor(...BLUE);
+  doc.roundedRect(margin, 28, 30, 30, 7, 7, 'F');
+  doc.setFillColor(255,255,255);
+  doc.circle(margin+15, 28+15, 4.5, 'F');
+
+  doc.setFont('times', 'bold');
+  doc.setFontSize(19);
+  doc.setTextColor(...NAVY);
+  doc.text('GUIA TERAPÊUTICO', margin + 40, 44);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9.5);
+  doc.setTextColor(...NAVY_LIGHT);
+  doc.text('SERVIÇO DE NEFROLOGIA', margin + 40, 57);
+
+  // caixa etiqueta do doente
+  const boxW = 190, boxH = 46;
+  const boxX = pageW - margin - boxW, boxY = 20;
+  doc.setDrawColor(...LINE);
+  doc.setLineDashPattern([3,2], 0);
+  doc.rect(boxX, boxY, boxW, boxH);
+  doc.setLineDashPattern([], 0);
+  doc.setFontSize(8);
+  doc.setTextColor(...SLATE);
+  if(patientName){
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(11);
+    doc.setTextColor(...NAVY);
+    doc.text(patientName, boxX + boxW/2, boxY + boxH/2 + 1, {align:'center'});
+  } else {
+    doc.setFont('helvetica','normal');
+    doc.text('ETIQUETA DO DOENTE', boxX + boxW/2, boxY + boxH/2 + 3, {align:'center'});
+  }
+
+  // ---- Tabela ----
+  const cols = ['Medicamento','Dosagem','Jejum','Peq.\nAlmoço','Almoço','Lanche','Jantar','Deitar','Observações'];
+  const timeCols = ['Jejum','Peq. Almoço','Almoço','Lanche','Jantar','Deitar'];
+  const body = meds.map(m => {
+    const row = [m.name, m.dose || ''];
+    timeCols.forEach(t => row.push(m.times[t] || ''));
+    row.push(m.obs || '');
+    return row;
+  });
+
+  doc.autoTable({
+    head: [cols],
+    body: body,
+    startY: 86,
+    margin: { left: margin, right: margin },
+    styles:{
+      font:'helvetica',
+      fontSize: 9.5,
+      cellPadding: 7,
+      lineColor: LINE,
+      lineWidth: 0.6,
+      textColor: NAVY,
+      valign:'middle'
+    },
+    headStyles:{
+      fillColor: NAVY,
+      textColor: 255,
+      fontStyle:'bold',
+      fontSize: 8.5,
+      halign:'center'
+    },
+    columnStyles:{
+      0:{ fontStyle:'bold', cellWidth: 150 },
+      1:{ cellWidth: 65, halign:'center' },
+      2:{ cellWidth: 55, halign:'center' },
+      3:{ cellWidth: 55, halign:'center' },
+      4:{ cellWidth: 55, halign:'center' },
+      5:{ cellWidth: 55, halign:'center' },
+      6:{ cellWidth: 55, halign:'center' },
+      7:{ cellWidth: 55, halign:'center' },
+    },
+    didParseCell: function(data){
+      if(data.section === 'body' && data.column.index >= 2 && data.column.index <= 7){
+        data.cell.styles.textColor = [34,120,60];
+        data.cell.styles.fontStyle = 'bold';
+      }
+    }
+  });
+
+  const tableEndY = doc.lastAutoTable.finalY;
+
+  // ---- Rodapé ----
+  const footerY = pageH - 34;
+  doc.setDrawColor(...LINE);
+  doc.setLineWidth(0.6);
+  doc.line(margin, footerY - 4, margin + 170, footerY - 4);
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(8.5);
+  doc.setTextColor(...NAVY_LIGHT);
+  doc.text('ASSINATURA MÉDICA', margin, footerY + 8);
+
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(10.5);
+  doc.setTextColor(...NAVY);
+  doc.text(dateStr, pageW - margin, footerY - 4, {align:'right'});
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(8);
+  doc.setTextColor(...SLATE);
+  doc.text(HOSPITAL_NOME, pageW - margin, footerY + 6, {align:'right'});
+  doc.text('Gerado automaticamente', pageW - margin, footerY + 15, {align:'right'});
+
+  doc.setFontSize(8);
+  doc.setTextColor(...SLATE);
+  doc.text('Página 1 de 1', pageW - margin, tableEndY + 16, {align:'right'});
+
+  const fname = (patientName ? patientName.replace(/[^a-zA-Z0-9]+/g,'_') + '_' : '') + 'guia_terapeutico_' + dateInput.value + '.pdf';
+  doc.save(fname);
+}
+</script>
+</body>
+</html>
